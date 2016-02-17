@@ -12,12 +12,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Linked\\ImagePresenter\\": "src"
+            "ImagePresenter\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Linked\\ImagePresenter\\Test\\": "tests",
+            "ImagePresenter\\Test\\": "tests",
             "Cake\\Test\\": "./vendor/cakephp/cakephp/tests"
         }
     }
