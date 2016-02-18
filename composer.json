@@ -1,5 +1,5 @@
 {
-    "name": "linked/image-presenter",
+    "name": "xavier83ar/image-presenter",
     "description": "A CakePHP plugin for creating thumbnails and image variants on the fly",
     "type": "cakephp-plugin",
     "require": {
