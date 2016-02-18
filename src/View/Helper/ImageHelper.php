@@ -1,7 +1,9 @@
 <?php
 namespace ImagePresenter\View\Helper;
 
+use Cake\Core\Plugin;
 use Cake\Routing\Router;
+use Cake\Utility\Inflector;
 use Cake\View\Helper;
 
 /**
@@ -24,26 +26,52 @@ class ImageHelper extends Helper
      * @param array $options            options
      * @return string
      */
-    public function variant($imagePath, $variantName, array $options = null)
+    public function variant($imagePath, $variantName, array $options = [])
     {
-        if ($imagePath[0] === '/') {
-            $originalFile = WWW_ROOT . substr($imagePath, 1);
-        } else {
-            $originalFile = WWW_ROOT . "img/{$imagePath}";
+        if (!array_key_exists('plugin', $options) || $options['plugin'] !== false) {
+            list($plugin, $imagePath) = $this->_View->pluginSplit($imagePath, false);
         }
         
-        $dirname = dirname($originalFile);
-        $variantFile = $dirname . DS . $variantName . DS . basename($originalFile);
+        $url = false;
+        $imagePath = ($imagePath[0] === '/') ? substr($imagePath, 1) : $imagePath;
         
-        if (is_file($variantFile)) {
-            return str_replace(WWW_ROOT, '/', $variantFile);
+        if (!isset($plugin)) {
+            $originalFile = WWW_ROOT . $imagePath;
+            $variantFile = dirname($originalFile) . DS . $variantName . DS . basename($originalFile);
+            if (is_file($variantFile)) {
+                $url = str_replace(WWW_ROOT, '/', $variantFile);
+            }
         } else {
-            return Router::url([
+            $originalFile = WWW_ROOT . Inflector::underscore($plugin) . DS . $imagePath;
+            $variantFile = dirname($originalFile) . DS . $variantName . DS . basename($originalFile);
+            
+            if (is_file($variantFile)) {
+                $url = str_replace(WWW_ROOT, '/', $variantFile);
+            } else {
+                $originalFile = Plugin::path($plugin) . 'webroot' . DS . $imagePath;
+                $variantFile = dirname($originalFile) . DS . $variantName . DS . basename($originalFile);
+                if (is_file($variantFile)) {
+                    $url = str_replace(
+                        Plugin::path($plugin) . 'webroot' . DS,
+                        '/' . Inflector::underscore($plugin) . '/',
+                        $variantFile
+                    );
+                }
+            }
+        }
+        
+        if ($url === false) {
+            $url = [
                 'controller' => 'Presenter',
                 'action' => 'variant',
                 'plugin' => 'ImagePresenter',
-                '?' => ['image' => $imagePath, 'variant' => $variantName]
-            ]);
+                '?' => [
+                    'image' => isset($plugin) ? "{$plugin}.{$imagePath}" : $imagePath,
+                    'variant' => $variantName
+                ]
+            ];
         }
+        
+        return Router::url($url);
     }
 }

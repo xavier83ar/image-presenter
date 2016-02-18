@@ -8,8 +8,10 @@
 namespace ImagePresenter\Controller;
 
 use Cake\Core\Configure;
+use Cake\Core\Plugin;
 use Cake\Filesystem\Folder;
 use Cake\Network\Response;
+use Cake\Utility\Inflector;
 use ImagePresenter\Exception\MissingConfigurationException;
 use ImagePresenter\Exception\MissingParametersException;
 use ImagePresenter\Exception\NotImplementedOperationException;
@@ -25,6 +27,9 @@ use Imagine\Imagick\Imagine;
  */
 class PresenterController extends AppController
 {
+    /**
+     * 
+     */
     const OPERATION_THUMBNAIL = 'thumbnail';
     const OPERATION_CLOSURE = 'closure';
 
@@ -36,20 +41,26 @@ class PresenterController extends AppController
     {
         $imagePath = $this->request->query('image');
         $variantName = $this->request->query('variant');
-        if (!$imagePath || !$variantName) {
+        if ((!$imagePath) || (!$variantName)) {
             throw new MissingParametersException(__d('image-presenter', 'Faltan parámetros'));
         }
-        if ($imagePath[0] === '/') {
-            $originalFile = WWW_ROOT . substr($imagePath, 1);
+
+        list($plugin, $imagePath) = pluginSplit($imagePath);
+        if (!isset($plugin)) {
+            $originalFile = WWW_ROOT . $imagePath;
         } else {
-            $originalFile = WWW_ROOT . "img/{$imagePath}";
+            $originalFile = WWW_ROOT . Inflector::underscore($plugin) . DS . $imagePath;
+            if (!is_file($originalFile)) {
+                $originalFile = Plugin::path($plugin) . 'webroot' . DS . $imagePath;
+            }
         }
-
         if (!is_file($originalFile)) {
-            throw new OriginalFileNotFoundException(__d('image-presenter', 'No se encontró el archivo original.'));
+            throw new OriginalFileNotFoundException(
+                __d('image-presenter', 'No se encontró el archivo original. {0}', $originalFile)
+            );
         }
-        $settings = Configure::read('ImagePresenter');
 
+        $settings = Configure::read('ImagePresenter');
         if (empty($settings['variants'][$variantName])) {
             throw new VariantConfigurationNotFoundException(
                 __d('image-presenter', 'No se encontró la configuración para esta variante {0}', $variantName)
@@ -59,24 +70,9 @@ class PresenterController extends AppController
         $variantFile = dirname($originalFile) . DS . $variantName . DS . basename($originalFile);
         $_folder = new Folder(dirname($variantFile), true);
         
-        if (substr($variantName, 0, 9) === self::OPERATION_THUMBNAIL &&
-            !array_key_exists('operation', $variantSettings)
-        ) {
-            $variantSettings['operation'] = self::OPERATION_THUMBNAIL;
-        }
+        list($operation, $closure) = $this->extractOperationOption($variantName, $variantSettings);
         
-        if (isset($variantSettings['operation']) && is_callable($variantSettings['operation'])) {
-            $variantSettings['closure'] = $variantSettings['operation'];
-            $variantSettings['operation'] = self::OPERATION_CLOSURE;
-        }
-        
-        if (empty($variantSettings['operation'])) {
-            throw new MissingConfigurationException(
-                __d('image-presenter', 'No se configuró la operación a realizar de forma adecuada')
-            );
-        }
-        
-        switch ($variantSettings['operation']) {
+        switch ($operation) {
             case self::OPERATION_THUMBNAIL:
                 $imagine = new Imagine();
                 $imagine
@@ -92,13 +88,13 @@ class PresenterController extends AppController
             case self::OPERATION_CLOSURE:
                 $imagine = new Imagine();
                 $image = $imagine->open($originalFile);
-                $variantSettings['closure']($image);
+                $closure($image);
                 $image->save($variantFile);
                 break;
 
             default:
                 throw new NotImplementedOperationException(
-                    __d('image-presenter', 'La operación: {0} no ha sido implementada', $variantSettings['operation'])
+                    __d('image-presenter', 'La operación {0} no ha sido implementada', $operation)
                 );
         }
         
@@ -172,5 +168,27 @@ class PresenterController extends AppController
         }
         
         return $filter;
+    }
+
+    /**
+     * @param string $variant Variant name
+     * @param array $settings variant settings
+     * @return array
+     */
+    protected function extractOperationOption($variant, array $settings)
+    {
+        if (substr($variant, 0, 9) === self::OPERATION_THUMBNAIL && !array_key_exists('operation', $settings)) {
+            return [self::OPERATION_THUMBNAIL, null];
+        }
+        if (isset($settings['operation']) && is_callable($settings['operation'])) {
+            return [self::OPERATION_CLOSURE, $settings['operation']];
+        }
+        if (isset($settings['operation'])) {
+            return [$settings['operation'], null];
+        }
+
+        throw new MissingConfigurationException(
+            __d('image-presenter', 'No se configuró la operación a realizar de forma adecuada')
+        );
     }
 }

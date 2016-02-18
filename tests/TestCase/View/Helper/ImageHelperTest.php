@@ -1,12 +1,17 @@
 <?php
 namespace ImagePresenter\Test\TestCase\View\Helper;
 
+use Cake\Core\Configure;
+use Cake\Core\Plugin;
+use Cake\Routing\Router;
 use Cake\TestSuite\TestCase;
 use Cake\View\View;
 use ImagePresenter\View\Helper\ImageHelper;
 
 /**
  * ImagePresenter\View\Helper\ImageHelper Test Case
+ * 
+ * @property ImageHelper $Image
  */
 class ImageHelperTest extends TestCase
 {
@@ -42,12 +47,35 @@ class ImageHelperTest extends TestCase
     }
 
     /**
-     * Test initial setup
-     *
      * @return void
      */
-    public function testInitialization()
+    public function testVariantWithExistingImage()
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $result = $this->Image->variant('ImagePresenter.img/image-2.jpg', 'thumbnail');
+        $this->assertEquals('/image_presenter/img/thumbnail/image-2.jpg', $result);
+    }
+
+    /**
+     * @return void
+     */
+    public function testVariantWithoutExistingImage()
+    {
+        $file = Plugin::path('ImagePresenter') . 'webroot' . DS . 'img' . DS . 'thumbnail' . DS . 'image-1.jpg';
+        if (is_file($file)) {
+            unlink($file);
+        }
+        
+        $result = $this->Image->variant('ImagePresenter.img/image-1.jpg', 'thumbnail');
+        $expected = Router::url([
+            'controller' => 'Presenter',
+            'action' => 'variant',
+            'plugin' => 'ImagePresenter',
+            '?' => [
+                'image' => 'ImagePresenter.img/image-1.jpg',
+                'variant' => 'thumbnail'
+            ]
+        ]);
+        
+        $this->assertEquals($expected, $result);
     }
 }

@@ -22,7 +22,7 @@
     <listeners>
         <listener
         class="\Cake\TestSuite\Fixture\FixtureInjector"
-        file="./vendor/cakephp/cakephp/src/TestSuite/Fixture/FixtureInjector.php">
+        file="../../vendor/cakephp/cakephp/src/TestSuite/Fixture/FixtureInjector.php">
             <arguments>
                 <object class="\Cake\TestSuite\Fixture\FixtureManager" />
             </arguments>
@@ -31,10 +31,12 @@
 
     <!-- Prevent coverage reports from looking in tests and vendors -->
     <filter>
+        <whitelist processUncoveredFilesFromWhitelist="true">
+            <directory suffix=".php">./src/</directory>
+        </whitelist>
         <blacklist>
             <directory suffix=".php">./vendor/</directory>
             <directory suffix=".ctp">./vendor/</directory>
-
             <directory suffix=".php">./tests/</directory>
             <directory suffix=".ctp">./tests/</directory>
         </blacklist>
