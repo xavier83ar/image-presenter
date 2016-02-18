@@ -2,6 +2,7 @@
     "name": "xavier83ar/image-presenter",
     "description": "A CakePHP plugin for creating thumbnails and image variants on the fly",
     "type": "cakephp-plugin",
+    "license": "MIT",
     "require": {
         "php": ">=5.4.16",
         "cakephp/cakephp": "~3.0",
