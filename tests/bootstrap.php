@@ -7,7 +7,7 @@
  */
 use Cake\Datasource\ConnectionManager;
 
-require dirname(dirname(dirname(__DIR__))) . '/config/bootstrap.php';
+require 'test-app/config/bootstrap.php';
 
 if (!getenv('db_dsn')) {
     putenv('db_dsn=sqlite:///:memory:');
