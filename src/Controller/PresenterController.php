@@ -45,7 +45,11 @@ class PresenterController extends AppController
             throw new MissingParametersException(__d('image-presenter', 'Faltan parámetros'));
         }
 
-        list($plugin, $imagePath) = pluginSplit($imagePath);
+        list($first, $second) = pluginSplit($imagePath);
+        if (Plugin::loaded($first) === true) {
+            $imagePath = $second;
+            $plugin = $first;
+        }
         if (!isset($plugin)) {
             $originalFile = WWW_ROOT . $imagePath;
         } else {

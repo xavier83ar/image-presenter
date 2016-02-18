@@ -31,7 +31,7 @@ class ImageHelper extends Helper
         if (!array_key_exists('plugin', $options) || $options['plugin'] !== false) {
             list($plugin, $imagePath) = $this->_View->pluginSplit($imagePath, false);
         }
-        
+
         $url = false;
         $imagePath = ($imagePath[0] === '/') ? substr($imagePath, 1) : $imagePath;
         
@@ -65,6 +65,7 @@ class ImageHelper extends Helper
                 'controller' => 'Presenter',
                 'action' => 'variant',
                 'plugin' => 'ImagePresenter',
+                'prefix' => false,
                 '?' => [
                     'image' => isset($plugin) ? "{$plugin}.{$imagePath}" : $imagePath,
                     'variant' => $variantName
