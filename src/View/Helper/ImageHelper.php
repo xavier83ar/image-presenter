@@ -39,14 +39,14 @@ class ImageHelper extends Helper
             $originalFile = WWW_ROOT . $imagePath;
             $variantFile = dirname($originalFile) . DS . $variantName . DS . basename($originalFile);
             if (is_file($variantFile)) {
-                $url = str_replace(WWW_ROOT, '/', $variantFile);
+                $url = str_replace(DS, '/', str_replace(WWW_ROOT, '/', $variantFile));
             }
         } else {
             $originalFile = WWW_ROOT . Inflector::underscore($plugin) . DS . $imagePath;
             $variantFile = dirname($originalFile) . DS . $variantName . DS . basename($originalFile);
             
             if (is_file($variantFile)) {
-                $url = str_replace(WWW_ROOT, '/', $variantFile);
+                $url = str_replace(DS, '/', str_replace(WWW_ROOT, '/', $variantFile));
             } else {
                 $originalFile = Plugin::path($plugin) . 'webroot' . DS . $imagePath;
                 $variantFile = dirname($originalFile) . DS . $variantName . DS . basename($originalFile);
@@ -56,6 +56,7 @@ class ImageHelper extends Helper
                         '/' . Inflector::underscore($plugin) . '/',
                         $variantFile
                     );
+                    $url = str_replace(DS, '/', $url);
                 }
             }
         }
