@@ -125,9 +125,9 @@ if (!Configure::read('App.fullBaseUrl')) {
     unset($httpHost, $s);
 }
 
-//Cache::config(Configure::consume('Cache'));
-//Log::config(Configure::consume('Log'));
-//Security::salt(Configure::consume('Security.salt'));
+Cache::config(Configure::consume('Cache'));
+Log::config(Configure::consume('Log'));
+Security::salt(Configure::consume('Security.salt'));
 
 Plugin::load('ImagePresenter', [
     'routes' => true,
@@ -137,7 +137,7 @@ Plugin::load('ImagePresenter', [
 /**
  * Connect middleware/dispatcher filters.
  */
-//DispatcherFactory::add('Asset');
-//DispatcherFactory::add('Routing');
-//DispatcherFactory::add('ControllerFactory');
+DispatcherFactory::add('Asset');
+DispatcherFactory::add('Routing');
+DispatcherFactory::add('ControllerFactory');
 

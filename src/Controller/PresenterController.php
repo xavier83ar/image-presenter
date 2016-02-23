@@ -7,6 +7,7 @@
 
 namespace ImagePresenter\Controller;
 
+use Cake\Controller\Controller;
 use Cake\Core\Configure;
 use Cake\Core\Plugin;
 use Cake\Filesystem\Folder;
@@ -19,13 +20,13 @@ use ImagePresenter\Exception\OriginalFileNotFoundException;
 use ImagePresenter\Exception\VariantConfigurationNotFoundException;
 use Imagine\Image\Box;
 use Imagine\Image\ImageInterface;
-use Imagine\Imagick\Imagine;
+use Imagine\Image\ImagineInterface;
 
 /**
  * Class PresenterController
- * @package Linked\ImagePresenter\Controller
+ * @package ImagePresenter\Controller
  */
-class PresenterController extends AppController
+class PresenterController extends Controller
 {
     /**
      * 
@@ -75,10 +76,10 @@ class PresenterController extends AppController
         $_folder = new Folder(dirname($variantFile), true);
         
         list($operation, $closure) = $this->extractOperationOption($variantName, $variantSettings);
+        $imagine = $this->getImagineInstance();
         
         switch ($operation) {
             case self::OPERATION_THUMBNAIL:
-                $imagine = new Imagine();
                 $imagine
                     ->open($originalFile)
                     ->thumbnail(
@@ -90,7 +91,6 @@ class PresenterController extends AppController
                 break;
 
             case self::OPERATION_CLOSURE:
-                $imagine = new Imagine();
                 $image = $imagine->open($originalFile);
                 $closure($image);
                 $image->save($variantFile);
@@ -194,5 +194,26 @@ class PresenterController extends AppController
         throw new MissingConfigurationException(
             __d('image-presenter', 'No se configuró la operación a realizar de forma adecuada')
         );
+    }
+
+    /**
+     * @return ImagineInterface
+     */
+    protected function getImagineInstance()
+    {
+        // primero intentamos con Imagick
+        try {
+            return new \Imagine\Imagick\Imagine();
+        } catch (\RuntimeException $e) {}
+        // luego con Gmagick
+        try {
+            return new \Imagine\Gmagick\Imagine();
+        } catch (\RuntimeException $e) {}
+        // finalmente con GD
+        try {
+            return new \Imagine\Gd\Imagine();
+        } catch (\RuntimeException $e) {}
+
+        throw new \RuntimeException(__d('image-presenter', 'No se enontró un runtime instalado, se necesita alguna de las siguientes extensiones instaladas: ImageMagick, Gmagick o GD.'));
     }
 }

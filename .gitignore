@@ -1,3 +1,5 @@
 /vendor/*
 /.idea
 /composer.lock
+/tests/test-app/logs
+/tests/test-app/tmp

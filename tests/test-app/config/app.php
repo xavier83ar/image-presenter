@@ -61,9 +61,9 @@ return [
      *   The salt value is also used as the encryption key.
      *   You should treat it as extremely sensitive data.
      */
-//    'Security' => [
-//        'salt' => '4c504ba5c5cb817babce037866737d479325c4352d9252f094b65ce1b733774f',
-//    ],
+    'Security' => [
+        'salt' => 'b9edbb904b1e787247b5e6163bff9dac341153c8ae2b4c8708cbec66c00c8759',
+    ],
 
     /**
      * Apply timestamps with the last modified time to static assets (js, css, images).
@@ -73,32 +73,44 @@ return [
      * Set to true to apply timestamps when debug is true. Set to 'force' to always
      * enable timestamping regardless of debug value.
      */
-//    'Asset' => [
-//        // 'timestamp' => true,
-//    ],
+    'Asset' => [
+        // 'timestamp' => true,
+    ],
 
     /**
      * Configure the cache adapters.
      */
-//    'Cache' => [
-//        'default' => [
-//            'className' => 'File',
-//            'path' => CACHE,
-//        ],
-//
-//        /**
-//         * Configure the cache used for general framework caching.
-//         * Translation cache files are stored with this configuration.
-//         * Duration will be set to '+1 year' in bootstrap.php when debug = false
-//         */
-//        '_cake_core_' => [
-//            'className' => 'File',
-//            'prefix' => 'myapp_cake_core_',
-//            'path' => CACHE . 'persistent/',
-//            'serialize' => true,
-//            'duration' => '+2 minutes',
-//        ],
-//    ],
+    'Cache' => [
+        'default' => [
+            'className' => 'File',
+            'path' => CACHE,
+        ],
+
+        /**
+         * Configure the cache used for general framework caching.
+         * Translation cache files are stored with this configuration.
+         */
+        '_cake_core_' => [
+            'className' => 'File',
+            'prefix' => 'ccu_cake_core_',
+            'path' => CACHE . 'persistent/',
+            'serialize' => true,
+            'duration' => '+2 minutes',
+        ],
+
+        /**
+         * Configure the cache for model and datasource caches. This cache
+         * configuration is used to store schema descriptions, and table listings
+         * in connections.
+         */
+        '_cake_model_' => [
+            'className' => 'File',
+            'prefix' => 'ccu_cake_model_',
+            'path' => CACHE . 'models/',
+            'serialize' => true,
+            'duration' => '+2 minutes',
+        ],
+    ],
 
     /**
      * Configure the Error and Exception handlers used by your application.
@@ -125,9 +137,6 @@ return [
      *   extend one of the listed exceptions will also be skipped for logging.
      *   E.g.:
      *   `'skipLog' => ['Cake\Network\Exception\NotFoundException', 'Cake\Network\Exception\UnauthorizedException']`
-     * - `extraFatalErrorMemory` - int - The number of megabytes to increase
-     *   the memory limit by when a fatal error is encountered. This allows
-     *   breathing room to complete logging or error handling.
      */
     'Error' => [
         'errorLevel' => E_ALL & ~E_DEPRECATED,
@@ -140,20 +149,20 @@ return [
     /**
      * Configures logging options
      */
-//    'Log' => [
-//        'debug' => [
-//            'className' => 'Cake\Log\Engine\FileLog',
-//            'path' => LOGS,
-//            'file' => 'debug',
-//            'levels' => ['notice', 'info', 'debug'],
-//        ],
-//        'error' => [
-//            'className' => 'Cake\Log\Engine\FileLog',
-//            'path' => LOGS,
-//            'file' => 'error',
-//            'levels' => ['warning', 'error', 'critical', 'alert', 'emergency'],
-//        ],
-//    ],
+    'Log' => [
+        'debug' => [
+            'className' => 'Cake\Log\Engine\FileLog',
+            'path' => LOGS,
+            'file' => 'debug',
+            'levels' => ['notice', 'info', 'debug'],
+        ],
+        'error' => [
+            'className' => 'Cake\Log\Engine\FileLog',
+            'path' => LOGS,
+            'file' => 'error',
+            'levels' => ['warning', 'error', 'critical', 'alert', 'emergency'],
+        ],
+    ],
 
     /**
      * Session configuration.
@@ -196,4 +205,16 @@ return [
     'Session' => [
         'defaults' => 'php',
     ],
+
+    /**
+     * Configuraciones propias del plugin
+     */
+    'ImagePresenter' => [
+        'variants' => [
+            'thumbnail' => [
+                'size' => [400, 320],
+                'mode' => \Imagine\Image\ImageInterface::THUMBNAIL_INSET
+            ]
+        ]
+    ]
 ];
